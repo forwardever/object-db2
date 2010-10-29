@@ -160,6 +160,11 @@ sub column {
 
 sub columns {
     my $self = shift;
+    $self->column(@_);
+}
+
+sub column_names {
+    my $self = shift;
 
     my @columns;
 
@@ -253,14 +258,14 @@ sub create {
 
     my $sql = ObjectDB::SQL::Insert->new;
     $sql->table($class->schema->table);
-    $sql->columns([$self->columns]);
+    $sql->columns([$self->column_names]);
     $sql->driver($self->conn->driver);
 
     return $self->conn->txn(
         sub {
             my $dbh = shift;
 
-            my @values = map { $self->column($_) } $self->columns;
+            my @values = map { $self->column($_) } $self->column_names;
 
             if (DEBUG) {
                 warn "$sql";
@@ -691,7 +696,7 @@ sub find {
     my $class  = shift;
     my %params = @_;
 
-    if (ref $class && $class->columns) {
+    if (ref $class && $class->column_names) {
         die
           q/find method can only be performed on table object, not on row object/;
     }
@@ -1131,7 +1136,7 @@ sub update {
     my $self = shift;
 
     # Row object
-    return $self->_update_instance(@_) if ref $self && $self->columns;
+    return $self->_update_instance(@_) if ref $self && $self->column_names;
 
     # Class or table object
     return $self->_update_objects(@_);
@@ -1379,7 +1384,7 @@ sub _primary_or_unique_key_columns {
 sub to_hash {
     my $self = shift;
 
-    my @columns = $self->columns;
+    my @columns = $self->column_names;
 
     my $hash = {};
     foreach my $key (@columns) {
