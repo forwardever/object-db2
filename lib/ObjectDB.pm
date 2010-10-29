@@ -239,7 +239,8 @@ sub create {
     my $class  = shift;
     my %params = @_;
 
-    my $self = ref($class) ? $class : $class->new(%params);
+    my $self = ref($class) ? $class : $class->new;
+    $self->init(%params);
 
     Carp::croak q/Connector required/ unless $self->conn;
 
