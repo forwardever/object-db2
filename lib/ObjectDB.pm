@@ -1130,13 +1130,18 @@ sub update_column {
 }
 
 sub update {
-    my $self = shift;
+    my $class   = shift;
+    my %params = @_;
 
-    # Row object
-    return $self->_update_instance(@_) if ref $self && $self->column_names;
+    if (ref $params{set} eq 'ARRAY' || ref $params{SET} eq 'ARRAY'){
+        return $class->_update_objects(@_);
+    }
+    else {
+        my $self = ref $class ? $class : $class->new;
+        $self->column(%params) if @_;
+        return $self->_update_instance(@_);
+    }
 
-    # Class or table object
-    return $self->_update_objects(@_);
 }
 
 sub _update_instance {
