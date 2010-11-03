@@ -780,7 +780,10 @@ sub find {
 
             if ($wantarray || $class->rows_as_object || $single) {
                 my $rows = $sth->fetchall_arrayref;
-                return unless $rows && @$rows;
+                unless ($rows && @$rows) {
+                    return if $wantarray || $single;
+                    return ObjectDB::Rows->new()->rows([]);
+                }
 
                 my @result;
 
@@ -811,7 +814,6 @@ sub find {
                         inflate => $params{inflate}
                     );
                 }
-
 
                 if ($wantarray) {
                     return @result;
