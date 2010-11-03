@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 15;
 
 use lib 't/lib';
 
@@ -14,10 +14,9 @@ TestEnv->setup;
 
 Schema::AuthorData->populate;
 
-
-# Classic iterator
+# simple test
 my $authors = Schema::Author->find(with => ['articles.comments'],);
-
+is( ref $authors, 'ObjectDB::Rows');
 
 # Now with rows_as_object option (for highest level) and
 # sub rows_as_objects {1} for related objects
@@ -71,6 +70,12 @@ is($authors->row(0)->articles->row(0)->comments->number_of_rows, 6);
 # to_hash
 my $authors_serialized = $authors->to_hash;
 is($authors_serialized->[0]->{articles}->[0]->{comments}->[0]->{content}, 'comment 1-1-1');
+
+
+# no results
+$authors = Schema::Author->find( where => [id => 3728472384] );
+is( ref $authors, 'ObjectDB::Rows');
+is( $authors->next, undef);
 
 
 
